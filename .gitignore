@@ -1,0 +1,23 @@
+# ImagingSource Library
+include/icimagingcontrol/*.h
+lib/msw/**/*.dll
+lib/msw/**/*.lib
+
+# Mac OS X cruft
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.user
+*.xcworkspace/
+*xcuserdata/
+.DS_Store
+
+boost/
+build/
+
+# Windows cruft
+*.suo
+*.ncb
+*.sdf
+Debug/
+Release/

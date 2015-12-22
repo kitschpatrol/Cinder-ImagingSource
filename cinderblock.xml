@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cinder>
+	<block
+	name="ImagingSource"
+	id="com.kitschpatrol.imagingsource"
+	git="https://github.com/kitschpatrol/Cinder-ImagingSource.git"
+	url="https://github.com/kitschpatrol/Cinder-ImagingSource"
+	author="Eric Mika"
+	summary="A thin wrapper for The Imaging Source's icimagingcontrol camera control SDK for Windows."
+	version="1.0.0"
+	library="http://www.theimagingsource.com/en_US/support/downloads/details/icimagingcontrol/"
+	license="MIT + Proprietary"
+	>
+		<supports os="msw" />	
+	
+		<headerPattern>src/*.h</headerPattern>
+		<sourcePattern>src/*.cpp</sourcePattern>
+
+		<platform os="msw">
+			<includePath>include/icimagingcontrol</includePath>			
+			<platform config="release">									
+				<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11_x64.lib</staticLibrary>
+				<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11_x64.dll</buildCopy>
+			</platform>					
+			<platform config="debug">						
+				<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_x64.lib</staticLibrary>
+				<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_x64.dll</buildCopy>
+			</platform>					
+		</platform>		
+	</block>
+</cinder>
