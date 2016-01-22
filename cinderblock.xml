@@ -15,17 +15,16 @@
 	
 		<headerPattern>src/*.h</headerPattern>
 		<sourcePattern>src/*.cpp</sourcePattern>
+		<includePath >src</includePath>
 
-		<platform os="msw">
-			<includePath>include/icimagingcontrol</includePath>			
-			<platform config="release">									
-				<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11_x64.lib</staticLibrary>
-				<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11_x64.dll</buildCopy>
-			</platform>					
-			<platform config="debug">						
-				<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_x64.lib</staticLibrary>
-				<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_x64.dll</buildCopy>
-			</platform>					
-		</platform>		
+		<includePath>include/icimagingcontrol</includePath>			
+		<platform config="release">									
+			<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11_$(PlatformTarget).lib</staticLibrary>
+			<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11_$(PlatformTarget).dll</buildCopy>
+		</platform>					
+		<platform config="debug">						
+			<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_$(PlatformTarget).lib</staticLibrary>
+			<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_$(PlatformTarget).dll</buildCopy>
+		</platform>
 	</block>
 </cinder>
