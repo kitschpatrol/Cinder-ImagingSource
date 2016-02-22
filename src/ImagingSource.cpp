@@ -1,70 +1,42 @@
 #include "ImagingSource.h"
 
-#include "cinder/app/App.h"
 #include "cinder/Log.h"
-
-
+#include "cinder/app/App.h"
 
 ImagingSource::ImagingSource() {
 	if (DShowLib::InitLibrary()) {
 		CI_LOG_V("IC Imaging Control Library Initialized.");
-	}
-	else {
+	} else {
 		CI_LOG_E("IC Imaging Control Library failed to initialized, unsupported platform.");
 	}
 
-	m_pGrabber = new DShowLib::Grabber();
-
-/*
-m_pSaveImageFilter = DShowLib::FilterLoader::createFilter("Save Image");
-	if (m_pSaveImageFilter != NULL) {
-		if (m_pGrabber->setDeviceFrameFilters(m_pSaveImageFilter.get()))
-		{
-			ofLogVerbose("Added Save Image filter");
-
-		}
-		else {
-			ofLogError("Failed to add image filter.");
-
-		}
-	}
-	else {
-		ofLogError("Failed to load save image filter.");
-	}
-	*/
+	mGrabber = new DShowLib::Grabber();
 
 	// Create a FrameTypeInfoArray data structure describing the allowed color formats.
 	DShowLib::FrameTypeInfoArray acceptedTypes = DShowLib::FrameTypeInfoArray::createRGBArray();
-	frameHandlerSink = DShowLib::FrameHandlerSink::create(acceptedTypes, 1);
-	frameHandlerSink->setSnapMode(false); // ?
+	mFrameHandlerSink = DShowLib::FrameHandlerSink::create(acceptedTypes, 1);
+	mFrameHandlerSink->setSnapMode(false);
 
-	if (!m_pGrabber->setSinkType(frameHandlerSink)) {
+	if (!mGrabber->setSinkType(mFrameHandlerSink)) {
 		CI_LOG_E("Failed to set sink type.");
 	}
 
-
 	// register for events
-	m_pGrabber->addListener(this, GrabberListener::eFRAMEREADY);
-
-	//pixels.allocate(640, 480, 3);
-
+	mGrabber->addListener(this, GrabberListener::eFRAMEREADY);
 }
 
-
-
 ImagingSource::~ImagingSource() {
-	delete m_pGrabber;
+	delete mGrabber;
 }
 
 void ImagingSource::listDevices() {
 	CI_LOG_V("Listing devices");
-	
-	DShowLib::Grabber::tVidCapDevListPtr deviceList = m_pGrabber->getAvailableVideoCaptureDevices();
+
+	DShowLib::Grabber::tVidCapDevListPtr deviceList = mGrabber->getAvailableVideoCaptureDevices();
 
 	if (deviceList == 0 || deviceList->empty()) {
 		CI_LOG_V("No cameras detected.");
-	}
-	else {
+	} else {
 		int index = 0;
 
 		for (DShowLib::VideoCaptureDeviceItem &device : *deviceList) {
@@ -72,43 +44,39 @@ void ImagingSource::listDevices() {
 			if (device.getSerialNumber(serialNumber)) {
 				CI_LOG_V("Camera ID: " << index << "\t Name: " << device.getBaseName() << " \tSerial: " << serialNumber);
 				index++;
-			}
-			else {
+			} else {
 				CI_LOG_W("Could not get camera serial number");
 			}
 		}
 	}
 }
 
-
 void ImagingSource::videoSettings() {
+	CI_LOG_V("Showing camera settings window.");
 
-	bool wasLive = m_pGrabber->isLive();
+	const bool wasLive = mGrabber->isLive();
 	if (wasLive) {
-		m_pGrabber->stopLive();
+		mGrabber->stopLive();
 	}
 
-	m_pGrabber->showDevicePage();
+	mGrabber->showVCDPropertyPage((HWND)ci::app::getWindow()->getNative());
 
 	if (wasLive) {
-		m_pGrabber->startLive();
+		mGrabber->startLive(false);
 	}
-
 }
 
 void ImagingSource::setDeviceID(int id) {
 	// get serial of device index
-	DShowLib::Grabber::tVidCapDevListPtr deviceList = m_pGrabber->getAvailableVideoCaptureDevices();
+	DShowLib::Grabber::tVidCapDevListPtr deviceList = mGrabber->getAvailableVideoCaptureDevices();
 
 	if (deviceList == 0 || deviceList->empty()) {
 		CI_LOG_V("No cameras detected.");
-	}
-	else {
+	} else {
 		long long serialNumber = 0;
 		if (deviceList->at(id).getSerialNumber(serialNumber)) {
 			setDeviceSerial(serialNumber);
-		}
-		else {
+		} else {
 			CI_LOG_E("Could not get camera serial number");
 		}
 	}
@@ -117,80 +85,93 @@ void ImagingSource::setDeviceID(int id) {
 void ImagingSource::setDeviceSerial(long long serial) {
 	// Todo close device
 
-	if (m_pGrabber->openDev(serial)) {
+	if (mGrabber->openDev(serial)) {
 		CI_LOG_V("Open camera with serial " << serial);
 
-
-		if (m_pGrabber->startLive(false)) {
+		if (mGrabber->startLive(false)) {
 			CI_LOG_E("Camera is live.");
 
-		}
-		else {
+		} else {
 			CI_LOG_E("Failed to take the camera live.");
-
 		}
 
-	}
-	else {
+	} else {
 		CI_LOG_E("Failed to open camera with serial " << serial);
 	}
 }
 
+void ImagingSource::loadSettings(const ci::fs::path &path) {
+	CI_LOG_V("Loading camera settings from " << path);
 
-void ImagingSource::loadSettings(const std::string &fileName) {
-	CI_LOG_V("Loading camera settings from " + fileName);
-
-	
-	if (m_pGrabber->loadDeviceStateFromFile(fileName)) {
-		CI_LOG_E("Loaded camera settings successfully");
+	const bool wasLive = mGrabber->isLive();
+	if (wasLive) {
+		mGrabber->stopLive();
 	}
-	else {
+
+	if (mGrabber->loadDeviceStateFromFile(path.string())) {
+		CI_LOG_E("Loaded camera settings successfully");
+	} else {
 		CI_LOG_E("Loading camera settings failed");
+	}
+
+	if (wasLive) {
+		mGrabber->startLive(false);
 	}
 }
 
-void ImagingSource::frameReady(DShowLib::Grabber& caller, smart_ptr<DShowLib::MemBuffer> pBuffer, DWORD FrameNumber) {
-	CI_LOG_V("Frame Ready! Number: " << FrameNumber);
+void ImagingSource::saveSettings(const ci::fs::path &path) {
+	CI_LOG_V("Saving camera settings to " << path);
+
+	if (mGrabber->saveDeviceStateToFile(path.string())) {
+		CI_LOG_E("Saved camera settings successfully");
+	} else {
+		CI_LOG_E("Save camera settings failed");
+	}
+}
+
+void ImagingSource::setCaptureMode(CaptureMode mode) {
+	switch (mode) {
+		case CaptureMode::STILL:
+			mFrameHandlerSink->setSnapMode(true);
+			break;
+		case CaptureMode::VIDEO:
+			mFrameHandlerSink->setSnapMode(false);
+			break;
+	}
+}
+
+CaptureMode ImagingSource::getCaptureMode() {
+	return mFrameHandlerSink->getSnapMode() ? CaptureMode::STILL : CaptureMode::VIDEO;
+}
+
+void ImagingSource::frameReady(DShowLib::Grabber &caller, smart_ptr<DShowLib::MemBuffer> pBuffer, DWORD FrameNumber) {
+	// CI_LOG_V("Frame Ready! Number: " << FrameNumber);
 
 	if (!mFrame) {
-		mFrame = ci::Surface8u::create(pBuffer->getSize().cx, pBuffer->getSize().cy, true, cinder::SurfaceChannelOrder::ARGB);
+		mFrame = ci::Surface8u::create(pBuffer->getSize().cx, pBuffer->getSize().cy, true, cinder::SurfaceChannelOrder::BGRX);
 	}
-
-	int bpp = pBuffer->getBitsPerPixel();
 
 	pBuffer->lock();
 	memcpy(mFrame->getData(), pBuffer->getPtr(), pBuffer->getSize().cx * pBuffer->getSize().cy * 4);
 	pBuffer->unlock();
 }
 
-
-//--------------------------------------------------------------------
 ci::Surface8uRef ImagingSource::getFrame() {
 	return mFrame;
 }
 
-
-/*/
-void CamCapture::myQueryFrame(IplImage* frame) {
-
-	//Grab one Image from Camera:
-
-	if (!pSink.get() == NULL) {
-
-		pSink->snapImages(1, 100);
-	}
-	else {
-		cout << "could not read from camera" << endl;
-		exit(1);
-	}
-
-	MemBufferCollection::tMemBufferPtr buffer = pSink->getLastAcqMemBuffer();
-
-	IplImage* raw = cvCreateImage(NATIVEIMAGESIZE, 8, 3);
-	raw->imageData = (char*)buffer->getPtr();
-
-	cvResize(raw, frame);
-	cvReleaseImage(&raw);
-
+void ImagingSource::snapStill() {
+	mFrameHandlerSink->snapImagesAsync(1);
 }
-*/
+
+void ImagingSource::setIsEnabled(bool value) {
+	if (value) {
+		mGrabber->startLive(false);
+	} else {
+		mGrabber->stopLive();
+	}
+}
+
+bool ImagingSource::getIsEnabled() {
+	return mGrabber->isLive();
+}
