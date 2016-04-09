@@ -86,17 +86,17 @@ void ImagingSource::setDeviceSerial(long long serial) {
 	// Todo close device
 
 	if (mGrabber->openDev(serial)) {
-		CI_LOG_V("Open camera with serial " << serial);
+		CI_LOG_V("Open camera with serial number " << serial);
 
 		if (mGrabber->startLive(false)) {
-			CI_LOG_E("Camera is live.");
+			CI_LOG_V("Camera is live.");
 
 		} else {
 			CI_LOG_E("Failed to take the camera live.");
 		}
 
 	} else {
-		CI_LOG_E("Failed to open camera with serial " << serial);
+		CI_LOG_E("Failed to open camera with serial number " << serial);
 	}
 }
 
@@ -109,7 +109,7 @@ void ImagingSource::loadSettings(const ci::fs::path &path) {
 	}
 
 	if (mGrabber->loadDeviceStateFromFile(path.string())) {
-		CI_LOG_E("Loaded camera settings successfully");
+		CI_LOG_V("Loaded camera settings successfully");
 	} else {
 		CI_LOG_E("Loading camera settings failed");
 	}
