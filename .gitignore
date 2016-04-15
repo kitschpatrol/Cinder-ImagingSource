@@ -1,7 +1,7 @@
 # ImagingSource Library
-include/icimagingcontrol/*.h
-lib/msw/**/*.dll
-lib/msw/**/*.lib
+#include/icimagingcontrol/*.h
+#lib/msw/**/*.dll
+#lib/msw/**/*.lib
 
 # Mac OS X cruft
 *.pbxuser
