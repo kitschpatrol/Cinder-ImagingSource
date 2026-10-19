@@ -7,7 +7,7 @@ ImagingSource::ImagingSource() {
 	if (DShowLib::InitLibrary()) {
 		CI_LOG_V("IC Imaging Control Library Initialized.");
 	} else {
-		CI_LOG_E("IC Imaging Control Library failed to initialized, unsupported platform.");
+		CI_LOG_E("IC Imaging Control Library failed to initialize, unsupported platform.");
 	}
 
 	mGrabber = new DShowLib::Grabber();
@@ -43,10 +43,10 @@ void ImagingSource::listDevices() {
 			long long serialNumber = 0;
 			if (device.getSerialNumber(serialNumber)) {
 				CI_LOG_V("Camera ID: " << index << "\t Name: " << device.getBaseName() << " \tSerial: " << serialNumber);
-				index++;
 			} else {
 				CI_LOG_W("Could not get camera serial number");
 			}
+			index++;
 		}
 	}
 }
@@ -83,8 +83,6 @@ void ImagingSource::setDeviceID(int id) {
 }
 
 void ImagingSource::setDeviceSerial(long long serial) {
-	// Todo close device
-
 	if (mGrabber->openDev(serial)) {
 		CI_LOG_V("Open camera with serial number " << serial);
 
@@ -123,7 +121,7 @@ void ImagingSource::saveSettings(const ci::fs::path &path) {
 	CI_LOG_V("Saving camera settings to " << path);
 
 	if (mGrabber->saveDeviceStateToFile(path.string())) {
-		CI_LOG_E("Saved camera settings successfully");
+		CI_LOG_V("Saved camera settings successfully");
 	} else {
 		CI_LOG_E("Save camera settings failed");
 	}

@@ -1,6 +1,6 @@
-REM This script copies the IC Imaging Control libraries from there default installation locations into the Block
-REM folder.  This assumes that you have already installed the C+++ SDK from ImaingSource's Website:
-REM http://www.theimagingsource.com/en_US/support/downloads/details/icimagingcontrol/
+REM Copies the IC Imaging Control headers and libraries from their default installation location into the block.
+REM Install the IC Imaging Control C++ SDK from The Imaging Source first:
+REM https://www.theimagingsource.com/en-us/support/download/icimagingcontrolcpp-3.5.7/
 
 xcopy /s /Y "%HOMEDRIVE%%HOMEPATH%\Documents\IC Imaging Control 3.4\classlib\include" "include\icimagingcontrol"
 
@@ -10,7 +10,7 @@ xcopy /s /Y "%HOMEDRIVE%%HOMEPATH%\Documents\IC Imaging Control 3.4\classlib\win
 xcopy /s /Y "%HOMEDRIVE%%HOMEPATH%\Documents\IC Imaging Control 3.4\classlib\x64\debug" "lib\msw\x64"
 xcopy /s /Y "%HOMEDRIVE%%HOMEPATH%\Documents\IC Imaging Control 3.4\classlib\x64\release" "lib\msw\x64"
 
-REM Append _x86 to the 32 bit libraries for ease of linking.
+REM Append _x86 to the 32-bit libraries so the block manifest can select them with $(PlatformTarget).
 
 cd lib\msw\x86
 ren TIS_UDSHL11.dll TIS_UDSHL11_x86.dll

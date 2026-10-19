@@ -7,8 +7,6 @@
 #define UDSHL_LIB_NO_COMPILER_CHECK
 #include "tisudshl.h"
 
-// TODO extend ofBaseVideoGrabber
-
 enum class CaptureMode {
 	STILL,
 	VIDEO,

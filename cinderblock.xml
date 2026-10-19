@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <cinder>
 	<block
-	name="ImagingSource"
-	id="com.kitschpatrol.imagingsource"
-	git="https://github.com/kitschpatrol/Cinder-ImagingSource.git"
-	url="https://github.com/kitschpatrol/Cinder-ImagingSource"
-	author="Eric Mika"
-	summary="A thin wrapper for The Imaging Source's icimagingcontrol camera control SDK for Windows."
-	version="1.0.0"
-	library="http://www.theimagingsource.com/en_US/support/downloads/details/icimagingcontrol/"
-	license="MIT + Proprietary"
+		name="ImagingSource"
+		id="com.kitschpatrol.imagingsource"
+		git="https://github.com/kitschpatrol/Cinder-ImagingSource.git"
+		url="https://github.com/kitschpatrol/Cinder-ImagingSource"
+		author="Eric Mika"
+		summary="CinderBlock for The Imaging Source's IC Imaging Control camera SDK on Windows."
+		version="1.0.0"
+		library="https://www.theimagingsource.com/en-us/support/download/icimagingcontrolcpp-3.5.7/"
+		license="MIT"
 	>
-		<supports os="msw" />	
-	
+		<supports os="msw" />
+
 		<headerPattern>src/*.h</headerPattern>
 		<sourcePattern>src/*.cpp</sourcePattern>
-		<includePath >src</includePath>
+		<includePath>src</includePath>
+		<includePath>include/icimagingcontrol</includePath>
 
-		<includePath>include/icimagingcontrol</includePath>			
-		<platform config="release">									
+		<platform config="release">
 			<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11_$(PlatformTarget).lib</staticLibrary>
 			<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11_$(PlatformTarget).dll</buildCopy>
-		</platform>					
-		<platform config="debug">						
+		</platform>
+		<platform config="debug">
 			<staticLibrary>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_$(PlatformTarget).lib</staticLibrary>
 			<buildCopy>lib/msw/$(PlatformTarget)/TIS_UDSHL11d_$(PlatformTarget).dll</buildCopy>
 		</platform>
